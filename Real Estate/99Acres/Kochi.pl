@@ -1,10 +1,16 @@
 #!/usr/bin/perl
 
+use lib "../lib";
 use strict;
+
+use Database;
 
 use Encode;
 use HTML::TreeBuilder;
 use WWW::Mechanize;
+
+my $db  = Database->new;
+my $sth = $db->prepare_insert('Kochi', '99acres') || exit;
 
 my $base_url   = 'http://www.99acres.com';
 my $search_url = 'http://www.99acres.com/property-in-kochi-ffid';
@@ -30,6 +36,7 @@ print scalar @time_divs . "\n";
 #exit;
 
 my $count = 0;
+ad:
 for my $div (@divs) {
     my @b       = $div->look_down(_tag => 'b');
     my $price   = $b[1]->as_trimmed_text;
@@ -53,10 +60,7 @@ for my $div (@divs) {
 
     $count++;
     print "count: $count\n\n";
-}
 
-sub trim {
-    my $string = shift;
-    $string =~ s/^\s+|\s+$//g;
-    return $string;
+    $sth->execute($title, undef, $summary, $locality, $price, $time, $link)
+        or next ad;
 }
