@@ -1,12 +1,21 @@
 #!/usr/bin/perl
 
+use lib "../lib";
 use strict;
+
+use Database;
+use Utils;
 
 use Encode;
 use HTML::TreeBuilder;
 use WWW::Mechanize;
 
-my $base_url = 'http://kochi.olx.in/real-estate-cat-16';
+my $db  = Database->new;
+my $sth = $db->prepare_insert('Kochi', 'OLX') || exit;
+
+my $utils = Utils->new;
+
+my $base_url = 'http://olx.in/kochi/real-estate/';
 my $mech     = WWW::Mechanize->new();
 
 eval { $mech->get($base_url); };
@@ -16,39 +25,42 @@ if ($@) {
 }
 
 my $tree = HTML::TreeBuilder->new_from_content(decode_utf8($mech->content()));
-my @detail_divs = $tree->look_down(_tag => 'div', class => 'second-column-container  table-cell');
-my @price_divs  = $tree->look_down(_tag => 'div', class => 'third-column-container table-cell');
-my @time_divs   = $tree->look_down(_tag => 'div', class => 'fourth-column-container table-cell');
+my @title_divs = $tree->look_down(_tag => 'h3', class => 'large lheight20 margintop10');
+my @detail_divs = $tree->look_down(_tag => 'p', class => 'color-9 lheight14 margintop3');
+my @price_divs  = $tree->look_down(_tag => 'strong', class => 'c000');
+my @time_divs   = $tree->look_down(_tag => 'p', class => 'color-9 lheight14 margintop3 small');
+print scalar @title_divs . "\n";
 print scalar @detail_divs . "\n";
 print scalar @price_divs . "\n";
 print scalar @time_divs . "\n";
-#exit;
+# exit;
 
 my $count = 0;
-for my $div (@detail_divs) {
-    my $a       = $div->look_down(_tag => 'a');
-    my $link    = $a->attr('href');
-    my $title   = $a->as_trimmed_text;
-    my $details = $div->look_down(_tag => 'span', class => 'itemlistinginfo clearfix')->as_trimmed_text;
-    my @details = map { trim($_) } split /\|/, $details;
-    my $type    = pop @details;
-    my $address = join ', ', @details;
-    my $price   = $price_divs[$count]->as_trimmed_text;
-    my $time    = $time_divs[$count]->as_trimmed_text;
+ad:
+for my $div (@title_divs) {
+    my $a        = $div->look_down(_tag => 'a');
+    my $link     = $a->attr('href');
+    my $title    = $div->as_trimmed_text;
+
+    my $type     = $detail_divs[$count]->as_trimmed_text;
+    my $locality = $detail_divs[$count]->look_down(_tag => 'span')->as_trimmed_text;
+    $type        =~ s/$locality$//;
+
+    my $price    = $price_divs[$count]->as_trimmed_text;
+    my $time     = $time_divs[$count]->as_trimmed_text;
 
     print "title: $title\n";
+    # print "summary: $summary\n";
     print "type: $type\n";
-    print "address: $address\n";
+    print "locality: $locality\n";
     print "price: $price\n";
     print "time: $time\n";
     print "link: $link\n";
+    # exit;
 
     $count++;
     print "count: $count\n\n";
-}
 
-sub trim {
-    my $string = shift;
-    $string =~ s/^\s+|\s+$//g;
-    return $string;
+    $sth->execute($title, $type, undef, $locality, $price, $time, $link)
+        or next ad;
 }

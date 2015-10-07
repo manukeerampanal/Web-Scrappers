@@ -1,17 +1,23 @@
 #!/usr/bin/perl
 
+use lib "../lib";
 use strict;
+
+use Database;
 
 use Encode;
 use HTML::TreeBuilder;
-use WWW::Mechanize;
+use WWW::Mechanize::Firefox;
+
+my $db  = Database->new;
+my $sth = $db->prepare_insert('Quikr') || exit;
 
 my $base_url = 'http://kochi.quikr.com/Real-Estate/w867';
-my $mech     = WWW::Mechanize->new();
+my $mech     = WWW::Mechanize::Firefox->new();
 
 eval { $mech->get($base_url); };
 if ($@) {
-    print "Error connecting to $base_url. Exitting...\n";
+    print "Error connecting to $base_url: $@ Exitting...\n";
     exit;
 }
 
@@ -27,6 +33,7 @@ my @normal_divs = $tree->look_down(_tag => 'div', class => 'snb_entire_ad ad');
 print scalar @normal_divs . "\n";
 
 my $count = 0;
+ad:
 for my $div (@normal_divs) {
     my $title    = $div->look_down(_tag => 'h3', class => 'adtitlesnb')
         ->as_trimmed_text;
@@ -34,7 +41,7 @@ for my $div (@normal_divs) {
         ->as_trimmed_text;
     my @a        = $div->look_down(_tag => 'a', class => 'defultchi2');
     my $type     = $a[0]->as_trimmed_text;
-    my $locality = $a[1]->as_trimmed_text =~ s/^In\s//r;
+    my $locality = $a[1]->as_trimmed_text =~ s/^In\s//;
     my $price    = $div->look_down(_tag => 'div', class => 'snb_price_tag')
         ->as_trimmed_text;
     my $time     = $div->look_down(_tag => 'span', class => 'datef')
@@ -53,10 +60,7 @@ for my $div (@normal_divs) {
 
     $count++;
     print "count: $count\n\n";
-}
 
-sub trim {
-    my $string = shift;
-    $string =~ s/^\s+|\s+$//g;
-    return $string;
+    $sth->execute($title, $type, $summary, $locality, $price, $time, $link)
+        or next ad;
 }

@@ -2,7 +2,7 @@ package Conf;
 
 use strict;
 
-require "../lib/settings.conf"; # GLOBAL settings hash
+require "../settings.conf"; # GLOBAL settings hash
 
 our %GLOBAL;
 
