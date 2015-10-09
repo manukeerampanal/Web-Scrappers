@@ -7,7 +7,7 @@ use Parallel::ForkManager;
 my @scripts = qw(
     ./OLX/Kochi.pl
     ./Quikr/Kochi.pl
-    ./99acres/Kochi.pl
+    ./99Acres/Kochi.pl
     ./IndiaProperty/Kochi.pl
     ./MagicBricks/Kochi.pl
     ./Click/Kochi.pl
