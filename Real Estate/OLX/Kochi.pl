@@ -4,7 +4,6 @@ use lib "./lib";
 use strict;
 
 use Database;
-use Utils;
 
 use Encode;
 use HTML::TreeBuilder;
@@ -12,8 +11,6 @@ use WWW::Mechanize;
 
 my $db  = Database->new;
 my $sth = $db->prepare_insert('Kochi', 'OLX') || exit;
-
-my $utils = Utils->new;
 
 my $base_url = 'http://olx.in/kochi/real-estate/';
 my $mech     = WWW::Mechanize->new();

@@ -33,24 +33,22 @@ print scalar @time_divs . "\n";
 my $count = 0;
 ad:
 for my $div (@divs) {
-    my $a        = ($div->look_down(_tag => 'a'))[0];
-    my $title    = $a->as_trimmed_text;
-    my $link     = $a->attr('href');
+    my $a     = ($div->look_down(_tag => 'a'))[0];
+    my $title = $a->as_trimmed_text;
+    my $link  = $a->attr('href');
 
-    my $price    = $div->look_down(_tag => 'div', class => 'prop-price-info')->as_trimmed_text;
+    my $price = $div->look_down(_tag => 'div', class => 'prop-price-info')->as_trimmed_text;
 
     my $title_p  = $div->look_down(_tag => 'div', class => 'prop-title')->look_down(_tag => 'p')->as_trimmed_text;
     my @title_p  = split /, /, $title_p;
     my $type     = $title_p[0];
     my $locality = $title_p[1];
 
-    my $time     = $time_divs[$count]->as_trimmed_text;
-    $time        =~ s/.+Last Updated//;
+    my $time = $time_divs[$count]->as_trimmed_text;
+    $time    =~ s/.+Last Updated//;
 
-    my @li       = $div->look_down(_tag => 'div', class => 'row')->look_down(_tag => 'li');
-    my $summary;
-    $summary    .= join ', ', map { $_->as_trimmed_text } @li;
-    $summary    .= ', ' . $div->look_down(_tag => 'p', class => 'prop-desc')->as_trimmed_text;
+    my @li      = $div->look_down(_tag => 'div', class => 'row')->look_down(_tag => 'li');
+    my $summary = join ', ', map { $_->as_trimmed_text } @li;
 
     print "title: $title\n";
     print "summary: $summary\n";

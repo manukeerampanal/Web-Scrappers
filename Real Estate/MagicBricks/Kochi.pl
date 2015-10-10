@@ -31,20 +31,27 @@ print scalar @divs . "\n";
 my $count = 0;
 ad:
 for my $div (@divs) {
-    my $title    = $div->look_down(_tag => 'p', class => 'proHeading')->as_trimmed_text;
+    my $title      = $div->look_down(_tag => 'p', class => 'proHeading')->as_trimmed_text;
     my ($locality) = $div->look_down(_tag => 'span', class => 'localityFirst')->as_trimmed_text;
-    my $price    = $div->look_down(_tag => 'span', class => 'proPriceField')->as_trimmed_text;
-    my $time     = $div->look_down(_tag => 'span', class => 'proPostedBy')->as_trimmed_text;
-    $time        =~ s/^Posted:? //;
-    my @summary  = $div->look_down(_tag => 'div', class => 'proDetailLine');
-    my $label    = $summary[1]->look_down(_tag => 'label')->as_trimmed_text;
-    my $summary  = $summary[1]->as_trimmed_text;
-    $summary     =~ s/^$label//;
-    my @li       = $div->look_down(_tag => 'div', class => 'amenitiesListing')->look_down(_tag => 'li');
-    $summary    .= ', ' . join ', ', map { $_->as_trimmed_text } @li;
+    my $price      = $div->look_down(_tag => 'span', class => 'proPriceField')->as_trimmed_text;
+
+    my $time = $div->look_down(_tag => 'span', class => 'proPostedBy')->as_trimmed_text;
+    $time    =~ s/^Posted:? //;
+
+    my @summary = $div->look_down(_tag => 'div', class => 'proDetailLine');
+    my $label   = $summary[1]->look_down(_tag => 'label')->as_trimmed_text;
+    my $summary = $summary[1]->as_trimmed_text;
+    $summary    =~ s/^$label//;
+
+    my $amenitiesListing = $div->look_down(_tag => 'div', class => 'amenitiesListing');
+    if ($amenitiesListing) {
+        my @li   = $amenitiesListing->look_down(_tag => 'li');
+        $summary .= ', ' . join ', ', map { $_->as_trimmed_text } @li if @li;
+    }
+
     # my $type     = join ', ', map { $_->as_trimmed_text } $ul[1]->look_down(_tag => 'li');
-    my $a        = $div->look_down(_tag => 'span', class => 'seeProDetail')->look_down(_tag => 'a');
-    my $link     = $base_url . $a->attr('href');
+    my $a    = $div->look_down(_tag => 'span', class => 'seeProDetail')->look_down(_tag => 'a');
+    my $link = $base_url . $a->attr('href');
 
     print "title: $title\n";
     print "summary: $summary\n";

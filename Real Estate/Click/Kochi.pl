@@ -29,20 +29,25 @@ print scalar @divs . "\n";
 my $count = 0;
 ad:
 for my $div (@divs) {
-    my $a        = $div->look_down(_tag => 'a');
-    my $title    = $a->as_trimmed_text;
-    my $link     = $a->attr('href');
-    my @b        = $div->look_down(_tag => 'b');
-    my $locality = $b[1]->as_trimmed_text;
-    my $price    = $div->look_down(_tag => 'div', class => 'clickin-postsPriceDetails')->as_trimmed_text;
+    my $a     = $div->look_down(_tag => 'a');
+    my $title = $a->as_trimmed_text;
+    my $link  = $a->attr('href');
 
-    my $summary  = $div->look_down(_tag => 'div', class => 'clickin-postsDesc')->as_trimmed_text;
-    $summary    .= ', ' . $div->look_down(_tag => 'div', class => 'clickin-postsDesc1')->as_trimmed_text;
+    my $locality;
+    my @b     = $div->look_down(_tag => 'b');
+    $locality = $b[1]->as_trimmed_text if @b;
+
+    my $price;
+    my $price_div = $div->look_down(_tag => 'div', class => 'clickin-postsPriceDetails');
+    $price        = $price_div->as_trimmed_text if $price_div;
+
+    my $summary = $div->look_down(_tag => 'div', class => 'clickin-postsDesc')->as_trimmed_text;
+    $summary   .= ', ' . $div->look_down(_tag => 'div', class => 'clickin-postsDesc1')->as_trimmed_text;
 
     my ($time, $type) = split /\s+\|\s+/, $div->look_down(_tag => 'span', class => 'roomTextDesc')->as_trimmed_text;
-    $time        =~ s/^Posted: //;
-    $time        =~ s/by .+$//;
-    $type        =~ s/ - .+$//;
+    $time =~ s/^Posted: //;
+    $time =~ s/by .+$//;
+    $type =~ s/ - .+$//;
 
     print "title: $title\n";
     print "summary: $summary\n";
