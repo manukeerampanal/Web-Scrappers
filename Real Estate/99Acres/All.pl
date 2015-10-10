@@ -30,6 +30,7 @@ city:
 for my $city (sort keys %$cities) {
     my $url  = $cities->{$city};
     my $mech = WWW::Mechanize->new();
+    $mech->agent_alias('Linux Mozilla');
 
     eval { $mech->get($url); };
     if ($@) {
@@ -49,16 +50,21 @@ for my $city (sort keys %$cities) {
     my $count = 0;
     ad:
     for my $div (@divs) {
-        my @b       = $div->look_down(_tag => 'b');
-        my $price   = $b[1]->as_trimmed_text;
+        my @b     = $div->look_down(_tag => 'b');
+        my $price = join ' ', map { $_->as_trimmed_text } @b;
+
         my ($title, $locality) = $div->look_down(_tag => 'a')->as_trimmed_text =~ m/(.+) in (.+)/;
+
         my $summary = $desc_divs[$count]->as_trimmed_text;
         $summary    =~ s/^Description : //;
-        my $link    = $base_url . $div->look_down(_tag => 'a')->attr('href');
-        my $time    = $time_divs[$count]->as_trimmed_text;
-        $time       =~ s/^.+?Posted : //;
-        #my @a       = $div->look_down(_tag => 'a', class => 'defultchi2');
-        #my $type    = $a[0]->as_trimmed_text;
+
+        my $link = $base_url . $div->look_down(_tag => 'a')->attr('href');
+
+        my $time = $time_divs[$count]->as_trimmed_text;
+        $time    =~ s/^.+?Posted : //;
+
+        #my @a    = $div->look_down(_tag => 'a', class => 'defultchi2');
+        #my $type = $a[0]->as_trimmed_text;
 
         print "title: $title\n";
         print "summary: $summary\n";
