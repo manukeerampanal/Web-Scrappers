@@ -2,7 +2,7 @@ package Conf;
 
 use strict;
 
-require "./settings.conf"; # GLOBAL settings hash
+require "/root/Real-Estate/settings.conf"; # GLOBAL settings hash
 
 our %GLOBAL;
 

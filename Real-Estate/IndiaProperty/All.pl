@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use lib './lib';
+use lib '/root/Real-Estate/lib';
 use strict;
 
 use Database;
@@ -10,7 +10,7 @@ use Encode;
 use HTML::TreeBuilder;
 use WWW::Mechanize;
 
-my $source = 'Click';
+my $source = 'IndiaProperty';
 
 my $db  = Database->new;
 my $sth = $db->{dbh}->prepare("
@@ -37,32 +37,32 @@ for my $city (sort keys %$cities) {
     }
 
     my $tree = HTML::TreeBuilder->new_from_content(decode_utf8($mech->content()));
-    my @divs = $tree->look_down(_tag => 'div', class => 'clickin-listingpagePostsRight');
+
+    my @divs = $tree->look_down(_tag => 'div', class => 'property-gid-info propety-info');
+    my @time_divs = $tree->look_down(_tag => 'div', class => 'prop-tab-lists clearfix');
     print scalar @divs . "\n";
-    #exit;
+    print scalar @time_divs . "\n";
+    # exit;
 
     my $count = 0;
     ad:
     for my $div (@divs) {
-        my $a     = $div->look_down(_tag => 'a');
+        my $a     = ($div->look_down(_tag => 'a'))[0];
         my $title = $a->as_trimmed_text;
         my $link  = $a->attr('href');
 
-        my $locality;
-        my @b     = $div->look_down(_tag => 'b');
-        $locality = $b[1]->as_trimmed_text if @b;
+        my $price = $div->look_down(_tag => 'div', class => 'prop-price-info')->as_trimmed_text;
 
-        my $price;
-        my $price_div = $div->look_down(_tag => 'div', class => 'clickin-postsPriceDetails');
-        $price        = $price_div->as_trimmed_text if $price_div;
+        my $title_p  = $div->look_down(_tag => 'div', class => 'prop-title')->look_down(_tag => 'p')->as_trimmed_text;
+        my @title_p  = split /, /, $title_p;
+        my $type     = $title_p[0];
+        my $locality = $title_p[1];
 
-        my $summary = $div->look_down(_tag => 'div', class => 'clickin-postsDesc')->as_trimmed_text;
-        $summary   .= ', ' . $div->look_down(_tag => 'div', class => 'clickin-postsDesc1')->as_trimmed_text;
+        my $time = $time_divs[$count]->as_trimmed_text;
+        $time    =~ s/.+Last Updated//;
 
-        my ($time, $type) = split /\s+\|\s+/, $div->look_down(_tag => 'span', class => 'roomTextDesc')->as_trimmed_text;
-        $time =~ s/^Posted: //;
-        $time =~ s/by .+$//;
-        $type =~ s/ - .+$//;
+        my @li      = $div->look_down(_tag => 'div', class => 'row')->look_down(_tag => 'li');
+        my $summary = join ', ', map { $_->as_trimmed_text } @li;
 
         print "title: $title\n";
         print "summary: $summary\n";

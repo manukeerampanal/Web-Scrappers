@@ -5,12 +5,12 @@ use strict;
 use Parallel::ForkManager;
 
 my @scripts = qw(
-    ./OLX/All.pl
-    ./Quikr/All.pl
-    ./99Acres/All.pl
-    ./IndiaProperty/All.pl
-    ./MagicBricks/All.pl
-    ./Click/All.pl
+    /root/Real-Estate/OLX/All.pl
+    /root/Real-Estate/99Acres/All.pl
+    /root/Real-Estate/IndiaProperty/All.pl
+    /root/Real-Estate/MagicBricks/All.pl
+    /root/Real-Estate/Click/All.pl
+    /root/Real-Estate/Quikr/All.pl
 );
 
 my $pm = Parallel::ForkManager->new(scalar @scripts);
