@@ -68,6 +68,17 @@ sub prepare_insert {
     return $sth;
 }
 
+sub prepare_replace {
+    my ($self, $source) = @_;
+    my $sth = $self->{dbh}->prepare("
+        REPLACE INTO ad
+            (city, source, title, type, summary, locality, price, time, link)
+        VALUES
+            (?, '$source', ?, ?, ?, ?, ?, ?, ?)
+    ") or die $self->{dbh}->errstr;
+    return $sth;
+}
+
 sub DESTROY {
     my $self = shift;
 

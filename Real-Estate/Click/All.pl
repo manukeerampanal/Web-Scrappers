@@ -13,12 +13,7 @@ use WWW::Mechanize;
 my $source = 'Click';
 
 my $db  = Database->new;
-my $sth = $db->{dbh}->prepare("
-    INSERT INTO ad
-        (city, source, title, type, summary, locality, price, time, link)
-    VALUES
-        (?, '$source', ?, ?, ?, ?, ?, ?, ?)
-") or die $db->{dbh}->errstr;
+my $sth = $db->prepare_replace($source) || exit;
 
 my $conf   = Conf->new;
 my $cities = $conf->{city}{$source};
