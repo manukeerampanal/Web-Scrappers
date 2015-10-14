@@ -13,7 +13,13 @@ use WWW::Mechanize;
 my $source = 'OLX';
 
 my $db  = Database->new;
-my $sth = $db->prepare_replace($source) || exit;
+# my $sth = $db->prepare_replace($source) || exit;
+my $sth = $db->{dbh}->prepare("
+    REPLACE INTO ad
+        (city, source, title, type, summary, locality, price, time, link, contact_name, contact_number)
+    VALUES
+        (?, '$source', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+") or die $db->{dbh}->errstr;
 
 my $conf   = Conf->new;
 my $cities = $conf->{city}{$source};
@@ -55,30 +61,46 @@ for my $city (@cities) {
     my $count = 0;
     ad:
     for my $div (@title_divs) {
-        my $a        = $div->look_down(_tag => 'a');
-        my $link     = $a->attr('href');
-        my $title    = $div->as_trimmed_text;
+        my $a     = $div->look_down(_tag => 'a');
+        my $link  = $a->attr('href');
+        my $title = $div->as_trimmed_text;
 
         my $type     = $detail_divs[$count]->as_trimmed_text;
         my $locality = $detail_divs[$count]->look_down(_tag => 'span')->as_trimmed_text;
         $type        =~ s/$locality$//;
 
-        my $price    = $price_divs[$count]->as_trimmed_text;
-        my $time     = $time_divs[$count]->as_trimmed_text;
+        my $price = $price_divs[$count]->as_trimmed_text;
+        my $time  = $time_divs[$count]->as_trimmed_text;
 
         print "title: $title\n";
-        # print "summary: $summary\n";
         print "type: $type\n";
         print "locality: $locality\n";
         print "price: $price\n";
         print "time: $time\n";
         print "link: $link\n";
+
+        my ($summary, $contact_name, $contact_number);
+        my $details_mech = WWW::Mechanize->new();
+
+        eval { $details_mech->get($link); };
+        if ($@) {
+            print "Error connecting to $link. Skipping...\n";
+        } else {
+            my $details_tree = HTML::TreeBuilder->new_from_content(decode_utf8($details_mech->content()));
+
+            $summary        = $details_tree->look_down(_tag => 'p', class => 'pding10 lheight20 large')->as_trimmed_text;
+            $contact_name   = $details_tree->look_down(_tag => 'span', class => 'block color-5 brkword xx-large')->as_trimmed_text;
+            $contact_number = $details_tree->look_down(_tag => 'strong', class => 'large lheight20 fnormal  ')->as_trimmed_text;
+        }
+        print "summary: $summary\n";
+        print "contact_name: $contact_name\n";
+        print "contact_number: $contact_number\n";
         # exit;
 
         $count++;
         print "count: $count\n\n";
 
-        $sth->execute($city, $title, $type, undef, $locality, $price, $time, $link) or next ad;
+        $sth->execute($city, $title, $type, $summary, $locality, $price, $time, $link, $contact_name, $contact_number) or next ad;
 
         $total_count++;
         print "total count: $total_count\n\n";

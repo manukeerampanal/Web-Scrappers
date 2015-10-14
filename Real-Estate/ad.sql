@@ -9,6 +9,8 @@ CREATE TABLE `ad` (
   `price` varchar(50) DEFAULT NULL,
   `time` varchar(50) DEFAULT NULL,
   `link` varchar(255) DEFAULT NULL,
+  `contact_name` varchar(50) DEFAULT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
   `added_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `city` (`city`),
