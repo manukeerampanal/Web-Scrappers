@@ -4,7 +4,7 @@ CREATE TABLE `ad` (
   `source` varchar(50) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `type` varchar(50) DEFAULT NULL,
-  `summary` varchar(255) DEFAULT NULL,
+  `summary` TEXT,
   `locality` varchar(100) DEFAULT NULL,
   `price` varchar(50) DEFAULT NULL,
   `time` varchar(50) DEFAULT NULL,
