@@ -35,7 +35,7 @@ for my $city (sort keys %$cities) {
 
     my $tree      = HTML::TreeBuilder->new_from_content(decode_utf8($mech->content()));
     my @divs      = $tree->look_down(_tag => 'div', class => 'wrapttl');
-    my @desc_divs = $tree->look_down(_tag => 'div', class => 'lf  f12');
+    my @desc_divs = $tree->look_down(_tag => 'div', class => 'lf  f12 wBr');
     my @time_divs = $tree->look_down(_tag => 'div', class => 'lf f13 hm10 mb5');
     print scalar @divs . "\n";
     print scalar @desc_divs . "\n";
