@@ -88,9 +88,13 @@ for my $city (@cities) {
         } else {
             my $details_tree = HTML::TreeBuilder->new_from_content(decode_utf8($details_mech->content()));
 
-            $summary        = $details_tree->look_down(_tag => 'p', class => 'pding10 lheight20 large')->as_trimmed_text;
-            $contact_name   = $details_tree->look_down(_tag => 'span', class => 'block color-5 brkword xx-large')->as_trimmed_text;
-            $contact_number = $details_tree->look_down(_tag => 'strong', class => 'large lheight20 fnormal  ')->as_trimmed_text;
+            $summary = $details_tree->look_down(_tag => 'p', class => 'pding10 lheight20 large')->as_trimmed_text;
+
+            my $contact_name_div = $details_tree->look_down(_tag => 'span', class => 'block color-5 brkword xx-large');
+            $contact_name        = $contact_name_div->as_trimmed_text if $contact_name_div;
+
+            my $contact_number_div = $details_tree->look_down(_tag => 'strong', class => 'large lheight20 fnormal  ');
+            $contact_number        = $contact_number_div->as_trimmed_text if $contact_number_div;
         }
         print "summary: $summary\n";
         print "contact_name: $contact_name\n";
