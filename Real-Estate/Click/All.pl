@@ -13,7 +13,13 @@ use WWW::Mechanize;
 my $source = 'Click';
 
 my $db  = Database->new;
-my $sth = $db->prepare_replace($source) || exit;
+# my $sth = $db->prepare_replace($source) || exit;
+my $sth = $db->{dbh}->prepare("
+    REPLACE INTO ad
+        (city, source, title, type, summary, locality, price, time, link, contact_number)
+    VALUES
+        (?, '$source', ?, ?, ?, ?, ?, ?, ?, ?)
+") or die $db->{dbh}->errstr;
 
 my $conf   = Conf->new;
 my $cities = $conf->{city}{$source};
@@ -51,27 +57,43 @@ for my $city (sort keys %$cities) {
         my $price_div = $div->look_down(_tag => 'div', class => 'clickin-postsPriceDetails');
         $price        = $price_div->as_trimmed_text if $price_div;
 
-        my $summary = $div->look_down(_tag => 'div', class => 'clickin-postsDesc')->as_trimmed_text;
-        $summary   .= ', ' . $div->look_down(_tag => 'div', class => 'clickin-postsDesc1')->as_trimmed_text;
-
         my ($time, $type) = split /\s+\|\s+/, $div->look_down(_tag => 'span', class => 'roomTextDesc')->as_trimmed_text;
         $time =~ s/^Posted: //;
         $time =~ s/by .+$//;
         $type =~ s/ - .+$//;
 
         print "title: $title\n";
-        print "summary: $summary\n";
         print "type: $type\n";
         print "locality: $locality\n";
         print "price: $price\n";
         print "time: $time\n";
         print "link: $link\n";
+
+        my ($summary, $contact_number);
+        my $details_mech = WWW::Mechanize->new();
+
+        eval { $details_mech->get($link); };
+        if ($@) {
+            print "Error connecting to $link. Skipping...\n";
+        } else {
+            my $details_tree = HTML::TreeBuilder->new_from_content(decode_utf8($details_mech->content()));
+
+            $summary = $details_tree->look_down(_tag => 'p', class => 'clickin-normalText')->as_trimmed_text;
+
+            my $contact_number_div = $details_tree->look_down(_tag => 'div', class => 'clickin-mobileNum phoneText');
+            $contact_number        = $contact_number_div->as_trimmed_text if $contact_number_div;
+        }
+
+        $summary .= "\n\n" . $div->look_down(_tag => 'div', class => 'clickin-postsDesc1')->as_trimmed_text;
+
+        print "summary: $summary\n";
+        print "contact_number: $contact_number\n";
         # exit;
 
         $count++;
         print "count: $count\n\n";
 
-        $sth->execute($city, $title, $type, $summary, $locality, $price, $time, $link) or next ad;
+        $sth->execute($city, $title, $type, $summary, $locality, $price, $time, $link, $contact_number) or next ad;
 
         $total_count++;
         print "total count: $total_count\n\n";
