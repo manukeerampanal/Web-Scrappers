@@ -88,7 +88,8 @@ for my $city (@cities) {
         } else {
             my $details_tree = HTML::TreeBuilder->new_from_content(decode_utf8($details_mech->content()));
 
-            $summary = $details_tree->look_down(_tag => 'p', class => 'pding10 lheight20 large')->as_trimmed_text;
+            my $summary_div = $details_tree->look_down(_tag => 'p', class => 'pding10 lheight20 large');
+            $summary        = $summary_div->as_trimmed_text if $summary_div;
 
             my $contact_name_div = $details_tree->look_down(_tag => 'span', class => 'block color-5 brkword xx-large');
             $contact_name        = $contact_name_div->as_trimmed_text if $contact_name_div;

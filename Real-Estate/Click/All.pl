@@ -78,7 +78,8 @@ for my $city (sort keys %$cities) {
         } else {
             my $details_tree = HTML::TreeBuilder->new_from_content(decode_utf8($details_mech->content()));
 
-            $summary = $details_tree->look_down(_tag => 'p', class => 'clickin-normalText')->as_trimmed_text;
+            my $summary_div = $details_tree->look_down(_tag => 'p', class => 'clickin-normalText');
+            $summary        = $summary_div->as_trimmed_text if $summary_div;
 
             my $contact_number_div = $details_tree->look_down(_tag => 'div', class => 'clickin-mobileNum phoneText');
             $contact_number        = $contact_number_div->as_trimmed_text if $contact_number_div;
