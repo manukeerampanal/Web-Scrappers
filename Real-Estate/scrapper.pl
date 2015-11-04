@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use lib "./lib";
+use lib "/root/Real-Estate/lib";
 use strict;
 
 use Database;
