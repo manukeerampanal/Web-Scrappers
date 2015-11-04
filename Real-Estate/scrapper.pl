@@ -1,8 +1,35 @@
 #!/usr/bin/perl
 
+use lib "./lib";
 use strict;
 
+use Database;
+
 use Parallel::ForkManager;
+
+my $db = Database->new;
+
+# Backup old ads and delete thereafter
+my $sth = $db->{dbh}->prepare("
+    INSERT INTO
+        ad_backup
+        (ad_id, city, source, title, type, summary, locality, price, time, link, contact_name, contact_number, added_date)
+    SELECT
+        id, city, source, title, type, summary, locality, price, time, link, contact_name, contact_number, added_date
+    FROM
+        ad
+    WHERE
+        DATEDIFF(CURDATE(), added_date) >= 30
+") or warn $db->{dbh}->errstr;
+$sth->execute() or warn $db->{dbh}->errstr;
+
+$sth = $db->{dbh}->prepare("
+    DELETE FROM
+        ad
+    WHERE
+        DATEDIFF(CURDATE(), added_date) >= 30
+") or warn $db->{dbh}->errstr;
+$sth->execute() or warn $db->{dbh}->errstr;
 
 my @scripts = qw(
     /root/Real-Estate/OLX/All.pl
