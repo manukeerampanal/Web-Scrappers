@@ -43,7 +43,6 @@ my @scripts = qw(
 my $pm = Parallel::ForkManager->new(scalar @scripts);
 
 for my $script (@scripts) {
-    print "$script\n";
     $pm->start and next;
     `/usr/bin/perl $script`;
     $pm->finish;
