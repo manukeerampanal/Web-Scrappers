@@ -55,8 +55,11 @@ for my $city (sort keys %$cities) {
 
         my $link = $base_url . $div->look_down(_tag => 'a')->attr('href');
 
-        my $time = $time_divs[$count]->as_trimmed_text;
-        $time    =~ s/^.+?Posted : //;
+        my $time;
+        if ($time_divs[$count]) {
+            $time = $time_divs[$count]->as_trimmed_text;
+            $time =~ s/^.+?Posted : //;
+        }
 
         #my @a    = $div->look_down(_tag => 'a', class => 'defultchi2');
         #my $type = $a[0]->as_trimmed_text;
