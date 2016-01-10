@@ -49,9 +49,12 @@ for my $city (sort keys %$cities) {
         $time    =~ s/^Posted:? //;
 
         my @summary = $div->look_down(_tag => 'div', class => 'proDetailLine');
-        my $label   = $summary[1]->look_down(_tag => 'label')->as_trimmed_text;
-        my $summary = $summary[1]->as_trimmed_text;
-        $summary    =~ s/^$label//;
+        my $summary;
+        if ($summary[1]) {
+            my $label = $summary[1]->look_down(_tag => 'label')->as_trimmed_text;
+            $summary  = $summary[1]->as_trimmed_text;
+            $summary  =~ s/^$label//;
+        }
 
         my $amenitiesListing = $div->look_down(_tag => 'div', class => 'amenitiesListing');
         if ($amenitiesListing) {
