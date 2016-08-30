@@ -37,7 +37,8 @@ for my $city (sort keys %$cities) {
     my @divs       = $tree->look_down(_tag => 'div', class => qr/_srpttl srpttl/);
     my @desc_divs  = $tree->look_down(_tag => 'div', class => 'lf  f12 wBr');
     my @time_divs  = $tree->look_down(_tag => 'div', class => 'lf f13 hm10 mb5');
-    my @title_divs = $tree->look_down(_tag => 'a', class => 'b wWrap');
+    #my @title_divs = $tree->look_down(_tag => 'a', class => 'b wWrap');
+    my @title_divs = $tree->look_down(_tag => 'a', id => qr/^desc_\w+/);
     print "divs: " . scalar @divs . "\n";
     print "desc_divs: " . scalar @desc_divs . "\n";
     print "time_divs: " . scalar @time_divs . "\n";
